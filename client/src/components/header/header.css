@@ -1,0 +1,46 @@
+header{
+
+    background-color: aliceblue;
+    border-radius: 0rem 0rem 1.5rem 1.5rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px;
+    
+  }
+
+.logo{
+
+    display:flex;
+    flex-direction:row;
+    word-spacing: 5px;
+    margin-left: 20px;
+
+    
+
+
+}
+.logo span{
+
+    color: #206A5D;
+    margin-left: 10px;
+    font-size: 25px;
+    font-weight: 600;
+}
+
+
+
+.home-links{
+
+ 
+  align-items: center;
+
+}
+.home-links, user{
+
+    display: flex;
+    flex-direction: row;
+}
