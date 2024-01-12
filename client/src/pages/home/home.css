@@ -1,0 +1,138 @@
+.hero {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 20px;
+  min-height: 80vh;
+  max-width: fit-content;
+}
+
+.hero-text {
+  margin-left: 30px;
+  width: 50%;
+  & > * {
+    color: #333;
+    margin-bottom: 2rem;
+  }
+  & > h2 span {
+    display: block;
+  }
+  & .hero-buttons a {
+    color: #fff;
+  }
+
+  .hero-buttons{
+    padding-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+  }
+}
+.hero-image {
+ 
+  margin-left: 10px;
+  text-align: center;
+ 
+}
+.hero-image img {
+  width: 80%;
+  border-radius: 1.5rem;
+ 
+
+}
+@media screen and (max-width: 600px) {
+  .hero {
+    flex-direction: column;
+  }
+
+  .hero-text {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    margin: auto;
+    text-align: center;
+  }
+  .hero-image {
+    width: 100%;
+    &img {
+      width: 100%;
+    }
+  }
+}
+
+/* Login Button */
+.button-login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  height: 45px;
+  width: 130px;
+  border: none;
+  background: #03c9876e;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: -15px;
+}
+
+.lable {
+  line-height: 20px;
+  font-size: 20px;
+  color: #206a5d;
+  font-family: sans-serif;
+  letter-spacing: 1px;
+}
+
+.button-login:hover {
+  background: #a2ff86;
+}
+
+.button-login:hover .svg-icon {
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(-360deg);
+  }
+}
+li {
+  margin-right: 10px;
+}
+
+/*Register Button */
+.button-register {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  height: 45px;
+  width: 130px;
+  border: none;
+  background: #f44949;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: -15px;
+}
+
+.lable {
+  line-height: 20px;
+  font-size: 20px;
+  color: aliceblue;
+  font-family: sans-serif;
+  letter-spacing: 1px;
+}
+
+.button-register:hover {
+  background: #D24545;
+}
+
+.button-register:hover .svg-icon {
+  animation: spin 2s linear infinite;
+}

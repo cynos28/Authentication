@@ -1,0 +1,12 @@
+.footer{
+    background-color: #206a5d;
+    display: flex;
+    padding: auto;
+    justify-content: center;
+    align-items: center;
+    height:70px;
+    color: aliceblue;
+    font-size: 12px;
+    border-radius: 3rem 3rem 0 0;
+    
+}
