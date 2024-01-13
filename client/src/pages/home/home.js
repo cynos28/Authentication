@@ -9,7 +9,7 @@ import HeroImage from "../../assets/hero.jpg"
 function home() {
   return (
     <div>
-      <Header />
+     
       <section className='hero'>
         <div className="hero-text">
           <h1>Your Stay, Our Passion – Where Comfort Meets Luxury!</h1>
@@ -41,7 +41,7 @@ function home() {
         </div>
 
       </section>
-      <Footer />
+    
     </div>
 
   )
