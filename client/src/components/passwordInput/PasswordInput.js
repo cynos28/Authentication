@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
-import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai"
-import { } from "../passwordInput/PasswordInput.css";
+import React, { useState } from 'react';
+import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
+import './PasswordInput.css'; // Assuming the correct path to your CSS file
 
-function PasswordInput({ placeholder, value, onChange, name, onPaste }) {
+function PasswordInput({ placeholder, value, onChange, name, onPaste, strength }) {
   const [showPassword, setShowPassword] = useState(false);
 
   const togglePassword = () => {
@@ -10,10 +10,10 @@ function PasswordInput({ placeholder, value, onChange, name, onPaste }) {
   };
 
   return (
-  <div className='pI'>
-      <div className={showPassword ? "text" : "Password"}>
+    <div className="pI">
+      <div className={showPassword ? 'text' : 'Password'}>
         <input
-          type={showPassword ? "text" : "password"}
+          type={showPassword ? 'text' : 'password'}
           className="input"
           placeholder={placeholder}
           name={name}
@@ -29,12 +29,11 @@ function PasswordInput({ placeholder, value, onChange, name, onPaste }) {
             <AiOutlineEye size={20} />
           )}
         </div>
+       
       </div>
-      </div>
-
+      <div className="password-strength">{strength}</div>
+    </div>
   );
 }
 
-  
-
-export default PasswordInput
+export default PasswordInput;

@@ -4,6 +4,7 @@ import './App.css';
 import Home from './pages/home/home';
 import Layout from './components/layout/Layout';
 import Login from './pages/Auth/Login'
+import Register from './pages/Auth/Register';
 
 
 function App() {
@@ -16,10 +17,8 @@ function App() {
           </Layout>
           } />
 
-          <Route path="/login" element={
-            <Login />
-       
-          } />
+          <Route path="/login" element={<Login />}/>
+          <Route path="/register" element={<Register />} />
 
         </Routes>
       </BrowserRouter>
