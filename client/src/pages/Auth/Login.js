@@ -5,6 +5,7 @@ import Header from '../../components/header/Header'
 import Footer from '../../components/footer/Footer'
 
 import { Link } from 'react-router-dom'
+import PasswordInput from '../../components/passwordInput/PasswordInput';
 
 function Login() {
     const [email, setEmail] = useState("");
@@ -12,17 +13,17 @@ function Login() {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-    
+
         // Use the functional form of state update to ensure the latest state is used
         if (name === 'email') {
-          setEmail((prevEmail) => value);
+            setEmail((prevEmail) => value);
         } else if (name === 'password') {
-          setPassword((prevPassword) => value);
+            setPassword((prevPassword) => value);
         }
-      }
-      const loginUser = () => { 
+    }
+    const loginUser = () => {
         console.log('Logging in...', { email, password });
-      };
+    };
     return (
 
 
@@ -36,7 +37,8 @@ function Login() {
                     <form className="form" onSubmit={loginUser}>
 
                         <input type="email" className="input" placeholder="Email" name="email" required value={email} onChange={handleInputChange} />
-                        <input type="password" className="input" placeholder="Password" name='password' required value={password} onChange={handleInputChange} />
+                        {/*<input type="password" className="input" placeholder="Password" name='password' required value={password} onChange={handleInputChange} /> */}
+                        <PasswordInput placeholder="Password" name='password' required value={password} onChange={handleInputChange}/>
                         <p className="page-link">
                             <span className="page-link-label"><Link to="/forgot">Forgot Password?</Link></span>
                         </p>
@@ -70,7 +72,9 @@ function Login() {
 	c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path>
                             </svg>
                             <span>Log in with Google</span>
+
                         </div>
+                        <Link to="/" >Home</Link>
                     </div>
                 </Card>
             </div>
