@@ -30,12 +30,12 @@ function Profile() {
   };
 
   return (
- 
-<>
+
+    <>
       <section>
-      <PageMenu />
+        <PageMenu />
         <div className="container">
-        
+
           <h2>Profile</h2>
           <div className="profile">
             <Card cardClass={'card'}>
@@ -58,7 +58,7 @@ function Profile() {
 
                   <p>
                     <label>Email:</label>
-                    <input type="text" name="email" value={profile.email} onChange={handleInputChange} disabled/>
+                    <input type="text" name="email" value={profile.email} onChange={handleInputChange} disabled />
                   </p>
 
                   <p>
@@ -70,7 +70,7 @@ function Profile() {
                     <label>Bio:</label>
                     <textarea name="phone" cols={30} rows={10} value={profile.bio} onChange={handleInputChange} />
                   </p>
-                  <button className="form-btn " style={{display:'block' , marginLeft:"20px"}}>Update</button>
+                  <button className="form-btn " style={{ display: 'block', marginLeft: '40px', width: '340px' }}>Update</button>
                 </form>
               </>
             </Card>
