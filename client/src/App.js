@@ -8,6 +8,7 @@ import Forgot from './pages/Auth/Forgot';
 import Login from './pages/Auth/Login';
 import Reset from './pages/Auth/Reset'
 import LoginAuth from './pages/Auth/LoginAuth';
+import Profile from './pages/Profile/Profile';
 
 
 function App() {
@@ -20,11 +21,15 @@ function App() {
           </Layout>
           } />
 
-          <Route path="/login" element={<Login />}/>
+          <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot" element={<Forgot />} />
           <Route path="/resetPassword/:resetToken" element={<Reset />} />
           <Route path="/loginAuth/:email" element={<LoginAuth />} />
+
+          <Route path="/profile" element={
+            <Layout> <Profile /> </Layout>
+          } />
 
         </Routes>
       </BrowserRouter>

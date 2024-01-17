@@ -1,0 +1,69 @@
+.profile {
+  .card {
+    width: 100%;
+    max-width: 850px;
+    
+    border: 1px solid teal;
+    display: flex;
+    
+    justify-content: center;
+  }
+  .profile-photo {
+    width: 100%;
+    max-width: 400px;
+   /* border: 1px solid #fff;  */
+    background-color: rgb(232, 241, 249);
+    padding: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: -30px;
+    border-radius: 0.7rem;
+   
+
+    & img {
+      width: 200px;
+      height: 200px;
+      border: 2px solid #fff;
+      border-radius: 50%;
+    }
+
+    & h3 {
+      color: rgb(101, 106, 106);
+      font-size: 2rem;
+      text-align: center;
+    }
+  }
+  form {
+    label {
+      display: block;
+      font-size: 1.4rem;
+      font-weight: 500;
+      margin-left: 20px;
+    }
+    input[type="text"],
+    input[type="number"],
+    input[type="file"],
+    input[type="email"],
+    select,
+    textarea,
+    input[type="password"] {
+      display: block;
+      font-size: 1.6rem;
+      font-weight: 300;
+      padding: 1rem;
+      margin: 1rem auto;
+      margin-left: 20px;
+      width: 100%;
+      border: 1px solid #777;
+      border-radius: 3px;
+      outline: none;
+    }
+
+    /*textarea {
+      width: 100%; */
+   }
+  }
+
+
+  
