@@ -68,7 +68,7 @@ function Profile() {
 
                   <p>
                     <label>Bio:</label>
-                    <textarea name="phone" cols={30} rows={10} value={profile.bio} onChange={handleInputChange} />
+                    <textarea name="bio" cols={30} rows={10} value={profile.bio} onChange={handleInputChange} />
                   </p>
                   <button className="form-btn " style={{ display: 'block', marginLeft: '40px', width: '340px' }}>Update</button>
                 </form>
