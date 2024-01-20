@@ -5,6 +5,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const userRoute = require("./routes/userRoute.js");
+const errorHandler = require("./middleware/middleware.js");
 
 const app = express();
 
@@ -26,6 +27,9 @@ app.use("/api/users", userRoute); // Removed the comma in the route definition
 app.get("/", (req, res) => {
     res.send("Home Page");
 });
+
+//Error Handler
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5001;
 

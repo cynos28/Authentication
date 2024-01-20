@@ -9,7 +9,7 @@ const userSchema = mongoose.Schema(
         },
 
         email: {
-            type: string,
+            type: String,
             require: [true, "Please add your email"],
             unique: true,
             match: [
@@ -23,12 +23,12 @@ const userSchema = mongoose.Schema(
         },
         password: {
 
-            type: string,
+            type: String,
             require: [true, "Please add your password"]
         },
         photo: {
 
-            type: string,
+            type: String,
 
 
         },
@@ -37,13 +37,13 @@ const userSchema = mongoose.Schema(
         },
 
         bio: {
-            type: string,
+            type: String,
             default: "bio",
             require: [true],
 
         },
         role: {
-            type: string,
+            type: String,
             default: "Subscriber",
             require: [true],
 

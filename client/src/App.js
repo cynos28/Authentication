@@ -27,7 +27,7 @@ function App() {
           <Route path="/forgot" element={<Forgot />} />
           <Route path="/resetPassword/:resetToken" element={<Reset />} />
           <Route path="/loginAuth/:email" element={<LoginAuth />} />
-        
+          
 
           <Route path="/profile" element={
             <Layout> <Profile /> </Layout>
