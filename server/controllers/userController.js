@@ -4,6 +4,8 @@ const bcrypt = require("bcryptjs");
 const { generateToken } = require("../utils");
 var parser = require('ua-parser-js');
 const jwt = require("jsonwebtoken");
+const sendEmail = require("../utils/sendEmail");
+
 
 
 //Register User
@@ -166,6 +168,7 @@ const updateUser = asyncHandler(async (req, res) => {
     user.bio = req.body.bio || bio;
     user.photo = req.body.photo || photo;
 
+
     // Save the updated user
     const updatedUser = await user.save();
 
@@ -208,13 +211,57 @@ const loginStatus = asyncHandler(async (req, res) => {
   return res.json(false);
 });
 
+//Send Automated Email
+const sendAutomatedEmail = asyncHandler(async (req, res) => {
+  const { subject,
+    send_to,
+    reply_to,
+    template, url } = req.body;
+
+  if (!subject || !send_to || !reply_to || !template
+  ) {
+    res.status(500);
+    throw new Error("Missing Email Parameter");
+
+  }
+
+
+  //Get User
+  const user = await User.findOne({ email: send_to });
+  if (!user) {
+    res.status(404);
+
+    throw new Error("User Not found");
+  }
+  const sent_from = process.env.EMAIL_USER;
+  const name = user.name;
+  const link = `${process.env.FRONTEND_URL}${url}`;
+
+  try {
+    await sendEmail(
+      subject,
+      send_to,
+      sent_from,
+      reply_to,
+      template,
+      name,
+      link
+    );
+    res.status(200).json({ message: "Email Sent" });
+  } catch (error) {
+    console.error(error); // Log the error
+    res.status(500).json({ error: "Email not sent, please try again" });
+  }
+
+});
+
 module.exports = {
   registerUser,
   loginUser,
   logoutUser,
   getUser,
   updateUser,
-  loginStatus
-
+  loginStatus,
+  sendAutomatedEmail
 
 };
