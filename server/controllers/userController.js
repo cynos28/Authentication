@@ -1,15 +1,18 @@
 const asyncHandler = require("express-async-handler");
 const User = require("../models/userModel");
+const Token = require("../models/tokenModel");  // Add this line for importing Token model
 const bcrypt = require("bcryptjs");
 const { generateToken } = require("../utils");
 var parser = require('ua-parser-js');
 const jwt = require("jsonwebtoken");
 const sendEmail = require("../utils/sendEmail");
+const crypto = require('crypto');
 
 
 
 //Register User
 const registerUser = asyncHandler(async (req, res) => {
+
   // res.send("Register User");
   const { name, email, password } = req.body;
 
@@ -40,6 +43,7 @@ const registerUser = asyncHandler(async (req, res) => {
     userAgent: [parser(req.headers['user-agent']).ua],
   });
 
+
   // GenerateToken
   const token = generateToken(user._id);
 
@@ -66,7 +70,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
 // Login user
 const loginUser = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password } = req.body
 
   // Validation
   if (!email || !password) {
@@ -111,6 +115,35 @@ const loginUser = asyncHandler(async (req, res) => {
     return res.json({ error: "Something went wrong, try again." });
   }
 });
+
+// Send verification email
+
+const sendVerificationEmail = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id );
+
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found");
+  }
+
+  if (user.isVerified) {
+    res.status(400);
+    throw new Error("User already verified");
+  }
+
+ // Delete token if it exists
+ let token = await Token.findOne({ userId: user._id });
+ if (token) {
+   await token.deleteOne();
+ }
+
+ // Create verification token and save
+ const verificationToken = crypto.randomBytes(32).toString("hex") + user._id;
+
+ console.log(verificationToken);
+ res.send("Token");
+});
+
 
 //LogOut user
 const logoutUser = asyncHandler(async (req, res) => {
@@ -245,7 +278,7 @@ const sendAutomatedEmail = asyncHandler(async (req, res) => {
       reply_to,
       template,
       name,
-      link 
+      link
     );
     res.status(200).json({ message: "Email Sent" });
   } catch (error) {
@@ -262,6 +295,7 @@ module.exports = {
   getUser,
   updateUser,
   loginStatus,
-  sendAutomatedEmail
+  sendAutomatedEmail,
+  sendVerificationEmail,
 
 };
