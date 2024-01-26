@@ -11,5 +11,6 @@ router.get("/getUser", protect,getUser);
 router.patch("/updateUser", protect,updateUser); 
 router.get("/loginStatus", loginStatus); 
 router.post("/sendAutomatedEmail",protect, sendAutomatedEmail); 
+router.post("/sendVerificationEmail",protect, sendVerificationEmail); 
 
 module.exports = router; 

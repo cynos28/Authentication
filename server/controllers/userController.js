@@ -245,7 +245,7 @@ const sendAutomatedEmail = asyncHandler(async (req, res) => {
       reply_to,
       template,
       name,
-      link
+      link 
     );
     res.status(200).json({ message: "Email Sent" });
   } catch (error) {
