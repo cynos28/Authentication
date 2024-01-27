@@ -2,11 +2,12 @@ const asyncHandler = require("express-async-handler");
 const User = require("../models/userModel");
 const Token = require("../models/tokenModel");  // Add this line for importing Token model
 const bcrypt = require("bcryptjs");
-const { generateToken } = require("../utils");
+const { generateToken, hashToken } = require("../utils");
 var parser = require('ua-parser-js');
 const jwt = require("jsonwebtoken");
 const sendEmail = require("../utils/sendEmail");
 const crypto = require('crypto');
+
 
 
 
@@ -119,7 +120,7 @@ const loginUser = asyncHandler(async (req, res) => {
 // Send verification email
 
 const sendVerificationEmail = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user._id );
+  const user = await User.findById(req.user._id);
 
   if (!user) {
     res.status(400);
@@ -131,19 +132,93 @@ const sendVerificationEmail = asyncHandler(async (req, res) => {
     throw new Error("User already verified");
   }
 
- // Delete token if it exists
- let token = await Token.findOne({ userId: user._id });
- if (token) {
-   await token.deleteOne();
- }
+  // Delete token if it exists
+  let token = await Token.findOne({ userId: user._id });
+  if (token) {
+    await token.deleteOne();
+  }
 
- // Create verification token and save
- const verificationToken = crypto.randomBytes(32).toString("hex") + user._id;
+  // Create verification token and save
+  const verificationToken = crypto.randomBytes(32).toString("hex") + user._id;
+  console.log(verificationToken);
 
- console.log(verificationToken);
- res.send("Token");
+  //Hash token and save  
+  const hashedToken = hashToken(verificationToken);
+  await new Token({
+    userId: user._id,
+    verificationToken: hashedToken,
+    createdAt: Date.now(),
+    expiredAt: Date.now() + 3600 *60 //1hr
+
+  }).save();
+
+  //Construct Verification URL
+  const verificationUrl = `${process.env.FRONTEND_URL}/verify/${verificationToken}`
+
+  //Send  Verification email
+
+  const subject = "Verify Your Account - PrimeLodge"
+  const send_to = user.email
+  const sent_from = process.env.EMAIL_USER
+  const reply_to = "noreply@primelodge.com"
+  const template = "verifyEmail"
+  const name = user.name
+  const link = verificationUrl
+
+  try {
+    await sendEmail(
+      subject,
+      send_to,
+      sent_from,
+      reply_to,
+      template,
+      name,
+      link
+    );
+    res.status(200).json({ message: "Email Sent" });
+  } catch (error) {
+    console.error(error); // Log the error
+    res.status(500).json({ error: "Email not sent, please try again" });
+  }
+
+
 });
 
+//Verify User
+const verifyUser = asyncHandler(async (req, res) => {
+  const { verificationToken } = req.params
+
+  const hashedToken = hashToken(verificationToken)
+
+  const userToken = await Token.findOne({
+    verificationToken: hashedToken,
+    expiredAt: { $gt: Date.now() }
+  })
+
+  if (!userToken) {
+    res.status(404);
+    throw new Error("Invalid or Expires Token ");
+
+  }
+
+  //Find USer
+  const user = await User.findOne({ _id: userToken.userId })
+
+  if (user.isVerified) {
+    res.status(400);
+    throw new Error("User is already Verified ");
+
+  }
+
+  //Now Verify User
+  user.isVerified = true;
+  await user.save();
+
+
+  res.status(200).json({
+     message: "Account Verification Successful" })
+
+});
 
 //LogOut user
 const logoutUser = asyncHandler(async (req, res) => {
@@ -280,7 +355,7 @@ const sendAutomatedEmail = asyncHandler(async (req, res) => {
       name,
       link
     );
-    res.status(200).json({ message: "Email Sent" });
+    res.status(200).json({ message: "Verification Email Sent" });
   } catch (error) {
     console.error(error); // Log the error
     res.status(500).json({ error: "Email not sent, please try again" });
@@ -297,5 +372,6 @@ module.exports = {
   loginStatus,
   sendAutomatedEmail,
   sendVerificationEmail,
+  verifyUser
 
 };
