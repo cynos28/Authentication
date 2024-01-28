@@ -11,6 +11,7 @@ const crypto = require('crypto');
 
 
 
+
 //Register User
 const registerUser = asyncHandler(async (req, res) => {
 
@@ -365,19 +366,120 @@ const sendAutomatedEmail = asyncHandler(async (req, res) => {
 
 //Forgot password
 const forgotPassword = asyncHandler (async(req,res)=>{
- 
+  
+  const {email} =req.body;
+  const user = await User.findOne({email});
+
+  if (!user) {
+    res.status(404);
+    throw new Error("No User with this email");
+  }
+  // Delete token if it exists
+  let token = await Token.findOne({ userId: user._id });
+  if (token) {
+    await token.deleteOne();
+  }
+
+  // Create verification token and save
+  const resetToken = crypto.randomBytes(32).toString("hex") + user._id;
+  console.log(resetToken);
+
+  //Hash token and save  
+  const hashedToken = hashToken(resetToken);
+  await new Token({
+    userId: user._id,
+    resetToken: hashedToken,
+    createdAt: Date.now(),
+    expiredAt: Date.now() + 3600 *60 //1hr
+
+  }).save();
+
+  //Construct Reset URL
+  const resetUrl = `${process.env.FRONTEND_URL}/reset/${resetToken}`
+
+  //Send  Verification email
+
+  const subject = "Password Reset Request - PrimeLodge";
+  const send_to = user.email;
+  const sent_from = process.env.EMAIL_USER;
+  const reply_to = "noreply@primelodge.com";
+  const template = "forgotPassword";
+  const name = user.name;
+  const link = resetUrl;
+
+  try {
+    await sendEmail(
+      subject,
+      send_to,
+      sent_from,
+      reply_to,
+      template,
+      name,
+      link
+    );
+    res.status(200).json({ message: "Password Reset Email Sent" });
+  } catch (error) {
+    console.error(error); // Log the error
+    res.status(500).json({ error: "Email not sent, please try again" });
+  }
+
+
+}); 
+
+//Reset password
+// Reset password
+const resetPassword = asyncHandler(async (req, res) => {
+  try {
+    const { resetToken } = req.params;
+    const { password } = req.body;
+
+    // Hash the reset token
+
+
+    // Find user token
+    const userToken = await Token.findOne({
+      resetToken: hashedToken,
+      expiredAt: { $gt: Date.now() }
+    });
+
+    if (!userToken) {
+      res.status(404).json({ message: "Invalid or expired token" });
+      return;
+    }
+
+    // Find user
+    const user = await User.findOne({ _id: userToken.userId });
+
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    // Reset password using bcrypt
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({ message: "Password reset successful, please login" });
+  } catch (error) {
+    console.error("Error in resetPassword:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+
 })
+
 
 module.exports = {
   registerUser,
   loginUser,
   logoutUser,
   getUser,
-  updateUser,
+  updateUser, 
   loginStatus,
   sendAutomatedEmail,
   sendVerificationEmail,
   verifyUser,
-  forgotPassword
+  forgotPassword,
+  resetPassword,
 
 };
