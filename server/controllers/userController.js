@@ -7,8 +7,8 @@ var parser = require('ua-parser-js');
 const jwt = require("jsonwebtoken");
 const sendEmail = require("../utils/sendEmail");
 const crypto = require('crypto');
-
-
+const Cryptr = require('cryptr');
+const cryptr = new Cryptr(process.env.CRYPT_KEY);
 
 
 
@@ -468,6 +468,38 @@ const resetPassword = asyncHandler(async (req, res) => {
 
 })
 
+//Change Password
+const changePassword = asyncHandler (async(req,res)=>{
+  const {oldPassword, password} = req.body
+  const user = await User.findById(req.user._id)
+
+  if(!user){
+
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  if (!oldPassword || !password){
+    res,status(400);
+    throw new error ("Please enter old and new password");
+  }
+//Check if Old password is correct
+const passwordIsCorrect = await bcrypt.compare(oldPassword, user.password)
+
+//Save new Password
+if (user && passwordIsCorrect){
+  user.password = password
+  await user.save();
+
+  res.status(200).json({message :"Password change Successfully, please re-login!"});
+  }else{
+    res.status(400).json({message :"Old password is incorrect!"});
+  }
+}
+
+
+)
+
 
 module.exports = {
   registerUser,
@@ -481,5 +513,6 @@ module.exports = {
   verifyUser,
   forgotPassword,
   resetPassword,
+  changePassword
 
 };
