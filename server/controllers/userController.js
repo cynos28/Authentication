@@ -8,6 +8,7 @@ const jwt = require("jsonwebtoken");
 const sendEmail = require("../utils/sendEmail");
 const crypto = require('crypto');
 const Cryptr = require('cryptr');
+
 const cryptr = new Cryptr(process.env.CRYPT_KEY);
 
 
@@ -93,6 +94,42 @@ const loginUser = asyncHandler(async (req, res) => {
     return res.json({ error: "Invalid email or password." });
   }
   // Trigger 2FA validation
+  const ua = parser(req.headers["user-agent"]);
+  const thisUserAgent = ua.ua;
+  console.log(thisUserAgent);
+  const allowedAgent = user.userAgent.includes(thisUserAgent)
+
+  if (!allowedAgent) {
+
+    //Generate 6 digit code
+    const loginCode = Math.floor(100000 + Math.random() * 900000);
+    console.log(loginCode)
+
+    //Encrypt login code before saving to DB
+    const EncryptedLoginCode = cryptr.encrypt(loginCode.toString())
+
+
+    // Delete token if it exists
+    let userToken = await Token.findOne({ userId: user._id });
+    if (userToken) {
+      await userToken.deleteOne();
+    }
+
+
+    //Save Token to DB  
+
+    await new Token({
+      userId: user._id,
+      loginToken: EncryptedLoginCode,
+      createdAt: Date.now(),
+      expiredAt: Date.now() + 3600 * 60 //1hr
+
+    }).save();
+
+    res.status(400)
+    throw new Error("Check your email for login code");
+  }
+
 
   // GenerateToken
   const token = generateToken(user._id);
@@ -116,6 +153,62 @@ const loginUser = asyncHandler(async (req, res) => {
     res.status(500);
     return res.json({ error: "Something went wrong, try again." });
   }
+});
+
+//Send Login code
+const sendLoginCode = asyncHandler(async (req, res) => {
+  const { email } = req.params;
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    res.status(404);
+    return res.json({ error: "User Not found, please signup." });
+  }
+
+  //Find Login Code
+  let userToken = await Token.findOne({
+    userId: user._id,
+    expiredAt: { $gt: Date.now() }
+  });
+
+  if (!userToken) {
+    res.status(404);
+    throw new Error("Invalid or Expired token, please login again");
+
+  }
+
+
+  const loginCode = userToken.loginToken;
+  const decryptedLoginCode = cryptr.decrypt(loginCode);
+
+
+  //Send  Login Code   
+  const subject = "Login Access Code - PrimeLodge";
+  const send_to = email;
+  const sent_from = process.env.EMAIL_USER;
+  const reply_to = "noreply@primelodge.com";
+  const template = "loginCode";
+  const name = user.name;
+  const link = decryptedLoginCode;
+
+
+  try {
+    await sendEmail(
+      subject,
+      send_to,
+      sent_from,
+      reply_to,
+      template,
+      name,
+      link
+    );
+    res.status(200).json({ message: "Access code sent to your email" });
+  } catch (error) {
+    console.error(error); // Log the error
+    res.status(500).json({ error: "Email not sent, please try again" });
+  }
+
+
 });
 
 // Send verification email
@@ -149,7 +242,7 @@ const sendVerificationEmail = asyncHandler(async (req, res) => {
     userId: user._id,
     verificationToken: hashedToken,
     createdAt: Date.now(),
-    expiredAt: Date.now() + 3600 *60 //1hr
+    expiredAt: Date.now() + 3600 * 60 //1hr
 
   }).save();
 
@@ -217,7 +310,8 @@ const verifyUser = asyncHandler(async (req, res) => {
 
 
   res.status(200).json({
-     message: "Account Verification Successful" })
+    message: "Account Verification Successful"
+  })
 
 });
 
@@ -365,10 +459,10 @@ const sendAutomatedEmail = asyncHandler(async (req, res) => {
 });
 
 //Forgot password
-const forgotPassword = asyncHandler (async(req,res)=>{
-  
-  const {email} =req.body;
-  const user = await User.findOne({email});
+const forgotPassword = asyncHandler(async (req, res) => {
+
+  const { email } = req.body;
+  const user = await User.findOne({ email });
 
   if (!user) {
     res.status(404);
@@ -390,15 +484,14 @@ const forgotPassword = asyncHandler (async(req,res)=>{
     userId: user._id,
     resetToken: hashedToken,
     createdAt: Date.now(),
-    expiredAt: Date.now() + 3600 *60 //1hr
+    expiredAt: Date.now() + 3600 * 60 //1hr
 
   }).save();
 
   //Construct Reset URL
   const resetUrl = `${process.env.FRONTEND_URL}/reset/${resetToken}`
 
-  //Send  Verification email
-
+  //Send  Verification email 
   const subject = "Password Reset Request - PrimeLodge";
   const send_to = user.email;
   const sent_from = process.env.EMAIL_USER;
@@ -406,6 +499,7 @@ const forgotPassword = asyncHandler (async(req,res)=>{
   const template = "forgotPassword";
   const name = user.name;
   const link = resetUrl;
+
 
   try {
     await sendEmail(
@@ -424,9 +518,9 @@ const forgotPassword = asyncHandler (async(req,res)=>{
   }
 
 
-}); 
+});
 
-//Reset password
+
 // Reset password
 const resetPassword = asyncHandler(async (req, res) => {
   try {
@@ -455,6 +549,7 @@ const resetPassword = asyncHandler(async (req, res) => {
       return;
     }
 
+
     // Reset password using bcrypt
     const hashedPassword = await bcrypt.hash(password, 10);
     user.password = hashedPassword;
@@ -469,31 +564,31 @@ const resetPassword = asyncHandler(async (req, res) => {
 })
 
 //Change Password
-const changePassword = asyncHandler (async(req,res)=>{
-  const {oldPassword, password} = req.body
+const changePassword = asyncHandler(async (req, res) => {
+  const { oldPassword, password } = req.body
   const user = await User.findById(req.user._id)
 
-  if(!user){
+  if (!user) {
 
     res.status(404);
     throw new Error("User not found");
   }
 
-  if (!oldPassword || !password){
-    res,status(400);
-    throw new error ("Please enter old and new password");
+  if (!oldPassword || !password) {
+    res, status(400);
+    throw new error("Please enter old and new password");
   }
-//Check if Old password is correct
-const passwordIsCorrect = await bcrypt.compare(oldPassword, user.password)
+  //Check if Old password is correct
+  const passwordIsCorrect = await bcrypt.compare(oldPassword, user.password)
 
-//Save new Password
-if (user && passwordIsCorrect){
-  user.password = password
-  await user.save();
+  //Save new Password
+  if (user && passwordIsCorrect) {
+    user.password = password
+    await user.save();
 
-  res.status(200).json({message :"Password change Successfully, please re-login!"});
-  }else{
-    res.status(400).json({message :"Old password is incorrect!"});
+    res.status(200).json({ message: "Password change Successfully, please re-login!" });
+  } else {
+    res.status(400).json({ message: "Old password is incorrect!" });
   }
 }
 
@@ -506,13 +601,14 @@ module.exports = {
   loginUser,
   logoutUser,
   getUser,
-  updateUser, 
+  updateUser,
   loginStatus,
   sendAutomatedEmail,
   sendVerificationEmail,
   verifyUser,
   forgotPassword,
   resetPassword,
-  changePassword
+  changePassword,
+  sendLoginCode
 
 };

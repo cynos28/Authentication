@@ -43,11 +43,13 @@ const userSchema = mongoose.Schema({
         type: Array,
         required: true,
         default: [],
-    }
+    },
+    
 }, {
     timestamps: true,
     minimize: false
 });
+
 
 //Encrypt password before the saving
 userSchema.pre("save",async function (next){

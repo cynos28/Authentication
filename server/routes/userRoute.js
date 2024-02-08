@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { registerUser ,loginUser, logoutUser, getUser, updateUser, loginStatus, sendAutomatedEmail, sendVerificationEmail, verifyUser, forgotPassword, resetPassword, changePassword, } = require("../controllers/userController");
+const { registerUser ,loginUser, logoutUser, getUser, updateUser, loginStatus, sendAutomatedEmail, sendVerificationEmail, verifyUser, forgotPassword, resetPassword, changePassword, sendLoginCode, } = require("../controllers/userController");
 const { protect } = require('../middleware/authMiddleware');
 
 
@@ -16,6 +16,7 @@ router.patch("/verifyUser/:verificationToken", verifyUser);
 router.post("/forgotPassword", forgotPassword); 
 router.patch("/resetpassword/:resetToken", resetPassword); 
 router.patch("/changePassword",protect, changePassword); 
+router.post("/sendLoginCode/:email",sendLoginCode); 
 
   
   
