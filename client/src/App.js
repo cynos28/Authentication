@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component,cloneElement } from 'react';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import './App.css';
 import Home from './pages/home/home';
@@ -10,12 +10,19 @@ import Reset from './pages/Auth/Reset'
 import LoginAuth from './pages/Auth/LoginAuth';
 import Profile from './pages/Profile/Profile';
 import ChangePassword from './pages/ChangePassword/ChangePassword';
+import axios from 'axios';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
+
+
+axios.defaults.withCredentials= true;
 
 function App() {
   return (
     <div>
       <BrowserRouter>
+      <ToastContainer />
         <Routes>
           <Route path="/" element={<Layout>
             <Home />
