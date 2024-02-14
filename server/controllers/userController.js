@@ -93,6 +93,8 @@ const loginUser = asyncHandler(async (req, res) => {
     res.status(400);
     return res.json({ error: "Invalid email or password." });
   }
+
+  
   // Trigger 2FA validation
   const ua = parser(req.headers["user-agent"]);
   const thisUserAgent = ua.ua;
@@ -127,7 +129,7 @@ const loginUser = asyncHandler(async (req, res) => {
     }).save();
 
     res.status(400)
-    throw new Error("Check your email for login code");
+    throw new Error("New Browser Detected ");
   }
 
 
@@ -155,7 +157,8 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 });
 
-//Send Login Code
+
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Send Login Code
 
 const sendLoginCode = asyncHandler(async (req, res) => {
   const { email } = req.params;
@@ -205,8 +208,12 @@ const sendLoginCode = asyncHandler(async (req, res) => {
     res.status(500).json({ error: "Email not sent, please try again" });
   }
 });
-//Login With Code
-const loginWithCode = asyncHandler(async(req,res)=> {
+
+
+
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Login With Code
+
+const loginWithCode = asyncHandler(async (req, res) => {
   const { email } = req.params;
   const { loginCode } = req.body;
 
@@ -233,6 +240,7 @@ const loginWithCode = asyncHandler(async(req,res)=> {
     res.status(404);
     throw new Error("Incorrect login code, Please try again");
   } else {
+
     //Register user agent
     const ua = parser(req.headers["user-agent"]);
     const thisUserAgent = ua.ua;
@@ -241,24 +249,24 @@ const loginWithCode = asyncHandler(async(req,res)=> {
     await user.save();
 
     // GenerateToken
-  const token = generateToken(user._id);
+    const token = generateToken(user._id);
 
-  // Send HTTP Only cookie
-  res.cookie("token", token, {
-    path: "/",
-    httpOnly: true,
-    expires: new Date(Date.now() + 1000 * 86400), // 1 day
-    sameSite: "none",
-    secure: true,
-  });
+    // Send HTTP Only cookie
+    res.cookie("token", token, {
+      path: "/",
+      httpOnly: true,
+      expires: new Date(Date.now() + 1000 * 86400), // 1 day
+      sameSite: "none",
+      secure: true,
+    });
 
 
     const { _id, name, email, phone, bio, photo, role, isVerified } = user;
 
     res.status(201).json({
-      _id, 
-      name, 
-      email, 
+      _id,
+      name,
+      email,
       phone, bio, photo, role, isVerified, token,
     });
 
@@ -267,11 +275,7 @@ const loginWithCode = asyncHandler(async(req,res)=> {
   }
 });
 
-
-  
-
-
-// Send verification email
+//>>>>>>>>>>>>>>>>>>>>>>>> Send verification email
 
 const sendVerificationEmail = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
