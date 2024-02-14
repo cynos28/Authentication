@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Styles from '../Auth/auth.module.css';
 import Card from '../../components/card/CardR';
-import Header from '../../components/header/Header';
+import Header from '../../components/header/header';
 import Footer from '../../components/footer/Footer';
 import { Link } from 'react-router-dom';
 import PasswordInput from '../../components/passwordInput/PasswordInput';
