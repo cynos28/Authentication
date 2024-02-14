@@ -155,7 +155,8 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 });
 
-//Send Login code
+//Send Login Code
+
 const sendLoginCode = asyncHandler(async (req, res) => {
   const { email } = req.params;
   const user = await User.findOne({ email });
@@ -165,7 +166,7 @@ const sendLoginCode = asyncHandler(async (req, res) => {
     return res.json({ error: "User Not found, please signup." });
   }
 
-  //Find Login Code
+  // Find Login Code
   let userToken = await Token.findOne({
     userId: user._id,
     expiredAt: { $gt: Date.now() }
@@ -173,16 +174,13 @@ const sendLoginCode = asyncHandler(async (req, res) => {
 
   if (!userToken) {
     res.status(404);
-    throw new Error("Invalid or Expired token, please login again");
-
+    return res.json({ error: "Invalid or Expired token, please login again" });
   }
-
 
   const loginCode = userToken.loginToken;
   const decryptedLoginCode = cryptr.decrypt(loginCode);
 
-
-  //Send  Login Code   
+  // Send Login Code
   const subject = "Login Access Code - PrimeLodge";
   const send_to = email;
   const sent_from = process.env.EMAIL_USER;
@@ -190,7 +188,6 @@ const sendLoginCode = asyncHandler(async (req, res) => {
   const template = "loginCode";
   const name = user.name;
   const link = decryptedLoginCode;
-
 
   try {
     await sendEmail(
@@ -207,9 +204,72 @@ const sendLoginCode = asyncHandler(async (req, res) => {
     console.error(error); // Log the error
     res.status(500).json({ error: "Email not sent, please try again" });
   }
-
-
 });
+//Login With Code
+const loginWithCode = asyncHandler(async(req,res)=> {
+  const { email } = req.params;
+  const { loginCode } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    res.status(404);
+    return res.json({ error: "User Not found, please signup." });
+  }
+
+  //Find User Login token
+  const userToken = await User.findOne({
+    userId: user.id,
+    expiredAt: { $gt: Date.now() }
+  });
+
+  if (!userToken) {
+    res.status(404);
+    throw new Error("Invalid or Expired Token,Please login again");
+  }
+
+  const decryptedLoginCode = cryptr.decrypt(userToken.loginCode);
+
+  if (loginCode !== decryptedLoginCode) {
+    res.status(404);
+    throw new Error("Incorrect login code, Please try again");
+  } else {
+    //Register user agent
+    const ua = parser(req.headers["user-agent"]);
+    const thisUserAgent = ua.ua;
+
+    user.userAgent.push(thisUserAgent)
+    await user.save();
+
+    // GenerateToken
+  const token = generateToken(user._id);
+
+  // Send HTTP Only cookie
+  res.cookie("token", token, {
+    path: "/",
+    httpOnly: true,
+    expires: new Date(Date.now() + 1000 * 86400), // 1 day
+    sameSite: "none",
+    secure: true,
+  });
+
+
+    const { _id, name, email, phone, bio, photo, role, isVerified } = user;
+
+    res.status(201).json({
+      _id, 
+      name, 
+      email, 
+      phone, bio, photo, role, isVerified, token,
+    });
+
+
+
+  }
+});
+
+
+  
+
 
 // Send verification email
 
@@ -609,6 +669,7 @@ module.exports = {
   forgotPassword,
   resetPassword,
   changePassword,
-  sendLoginCode
+  sendLoginCode,
+  loginWithCode
 
 };
