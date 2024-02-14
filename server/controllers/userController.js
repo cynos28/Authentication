@@ -157,16 +157,15 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 });
 
+//>>>>>>>>>>>>>>>>>>>>>>>> Send login Code
 
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Send Login Code
 
 const sendLoginCode = asyncHandler(async (req, res) => {
-  const { email } = req.params;
-  const user = await User.findOne({ email });
+  const { email: userEmail } = req.params;
+  const user = await User.findOne({ email: userEmail });
 
   if (!user) {
-    res.status(404);
-    return res.json({ error: "User Not found, please signup." });
+    return res.status(404).json({ error: "User Not found, please signup." });
   }
 
   // Find Login Code
@@ -176,8 +175,7 @@ const sendLoginCode = asyncHandler(async (req, res) => {
   });
 
   if (!userToken) {
-    res.status(404);
-    return res.json({ error: "Invalid or Expired token, please login again" });
+    return res.status(404).json({ error: "Invalid or Expired token, please login again" });
   }
 
   const loginCode = userToken.loginToken;
@@ -185,7 +183,7 @@ const sendLoginCode = asyncHandler(async (req, res) => {
 
   // Send Login Code
   const subject = "Login Access Code - PrimeLodge";
-  const send_to = email;
+  const send_to = userEmail;
   const sent_from = process.env.EMAIL_USER;
   const reply_to = "noreply@primelodge.com";
   const template = "loginCode";
@@ -210,70 +208,68 @@ const sendLoginCode = asyncHandler(async (req, res) => {
 });
 
 
-
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Login With Code
-
+//>>>>>>>>>>>>>>>>>>>>>>>> Login with code
 const loginWithCode = asyncHandler(async (req, res) => {
-  const { email } = req.params;
+  const { email: userEmail } = req.params;
   const { loginCode } = req.body;
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email: userEmail });
   if (!user) {
-    res.status(404);
-    return res.json({ error: "User Not found, please signup." });
+    return res.status(404).json({ error: "User Not found, please signup." });
   }
 
-  //Find User Login token
-  const userToken = await User.findOne({
-    userId: user.id,
+  // Find User Login token
+  const userToken = await Token.findOne({
+    userId: user._id,
     expiredAt: { $gt: Date.now() }
   });
 
   if (!userToken) {
-    res.status(404);
-    throw new Error("Invalid or Expired Token,Please login again");
+    return res.status(404).json({ error: "Invalid or Expired Token,Please login again" });
   }
 
-  const decryptedLoginCode = cryptr.decrypt(userToken.loginCode);
+  const decryptedLoginCode = cryptr.decrypt(userToken.loginToken);
 
   if (loginCode !== decryptedLoginCode) {
-    res.status(404);
-    throw new Error("Incorrect login code, Please try again");
-  } else {
-
-    //Register user agent
-    const ua = parser(req.headers["user-agent"]);
-    const thisUserAgent = ua.ua;
-
-    user.userAgent.push(thisUserAgent)
-    await user.save();
-
-    // GenerateToken
-    const token = generateToken(user._id);
-
-    // Send HTTP Only cookie
-    res.cookie("token", token, {
-      path: "/",
-      httpOnly: true,
-      expires: new Date(Date.now() + 1000 * 86400), // 1 day
-      sameSite: "none",
-      secure: true,
-    });
-
-
-    const { _id, name, email, phone, bio, photo, role, isVerified } = user;
-
-    res.status(201).json({
-      _id,
-      name,
-      email,
-      phone, bio, photo, role, isVerified, token,
-    });
-
-
-
+    return res.status(404).json({ error: "Incorrect login code, Please try again" });
   }
+
+  // Register user agent
+  const ua = parser(req.headers["user-agent"]);
+  const thisUserAgent = ua.ua;
+
+  user.userAgent.push(thisUserAgent);
+  await user.save();
+
+  // Generate Token
+  const token = generateToken(user._id);
+
+  // Send HTTP Only cookie
+  res.cookie("token", token, {
+    path: "/",
+    httpOnly: true,
+    expires: new Date(Date.now() + 1000 * 86400), // 1 day
+    sameSite: "none",
+    secure: true,
+  });
+
+  const { _id, name, email, phone, bio, photo, role, isVerified } = user;
+
+  res.status(201).json({
+    _id,
+    name,
+    email,
+    phone,
+    bio,
+    photo,
+    role,
+    isVerified,
+    token,
+  });
 });
+
+
+
 
 //>>>>>>>>>>>>>>>>>>>>>>>> Send verification email
 
