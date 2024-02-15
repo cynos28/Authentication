@@ -157,7 +157,7 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 });
 
-//>>>>>>>>>>>>>>>>>>>>>>>> Send login Code
+//>>>>>>>>>>>>>>>>>>>>>>>> Send login Code>>
 
 
 const sendLoginCode = asyncHandler(async (req, res) => {
